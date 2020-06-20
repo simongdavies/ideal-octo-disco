@@ -1,0 +1,11 @@
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1-bionic
+ARG certpwd
+ARG certfile
+COPY / /test
+WORKDIR /test
+RUN apt-get update && apt-get -y install jq
+RUN openssl pkcs12 -in $certfile -clcerts -nokeys -out emulator.crt -password pass:$certpwd && cp emulator.crt /usr/local/share/ca-certificates/ 
+RUN  update-ca-certificates --verbose
+RUN dotnet tool install -g dotnet-reportgenerator-globaltool
+RUN chmod 744 run_tests_in_container.sh
+ENTRYPOINT ["/bin/bash","run_tests_in_container.sh"] 
